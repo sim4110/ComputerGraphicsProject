@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>HomeWork
+        </title>
+        <script src="./three.js"></script>
+        <script src="./dat.gui.js"></script>
+        <script src="./OrbitControls.js"></script>
+        
+        <style>
+            body {
+                margin: 0;
+                overflow: hidden;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="webgl-output"></div>
+        <script>
+
+            function init() {
+
+                var scene = new THREE.Scene();
+                var camera = new THREE.PerspectiveCamera(
+                    45,
+                    window.innerWidth / window.innerHeight,
+                    0.1,
+                    50000
+                );
+
+                const gui = new dat.GUI();
+
+                var renderer = new THREE.WebGLRenderer();
+                renderer.setClearColor(new THREE.Color(0x808080));
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.shadowMap.enabled = true;
+
+                //화면 마우스로 회전시키기
+                const controls = new THREE.OrbitControls(camera, renderer.domElement);
+                camera.position.set(100, 5000, 0);
+                controls.update();
+
+                //light
+                //태양
+                sun = new THREE.DirectionalLight(0xffffff, 0.3);
+                sun.castShadow = true;
+                sun.position.set(0,50000,-100000);
+                sun.castShadow = true;
+                scene.add(sun);
+                gui.add(sun,"visible").name("sun");
+
+                //형광등
+                light = new THREE.PointLight(0xffffff, 0.75, 6000, 1);
+                light.position.set(-50, 650, -300);
+                light.castShadow = true;
+                scene.add(light);
+                gui.add(light,"visible").name("형광등");
+
+                //문앞 전등
+                light2 = new THREE.PointLight(0xffffff, 0.6, 3000, 1);
+                light2.position.set(-500, 650, 1300);
+                light2.castShadow = true;
+                scene.add(light2);
+                gui.add(light2,"visible").name("문앞조명");
+
+                //화장실 전등
+                t_light = new THREE.PointLight(0xffffff, 0.8, 2000, 1);
+                t_light.position.set(400, 500, 1400);
+                t_light.castShadow = true;
+                scene.add(t_light);
+                gui.add(t_light,"visible").name("화장실조명");
+
+                //복도 전등
+                H_light = new THREE.PointLight(0xffffff, 0.8, 5000, 1);
+                H_light.position.set(600, 600, 2400);
+                H_light.castShadow = true;
+                scene.add(H_light);
+                gui.add(H_light,"visible").name("복도조명");
+
+
+                //light helper
+                const pointLightHelper = new THREE.PointLightHelper( light, 1 );
+                const pointLightHelper2 = new THREE.PointLightHelper( light2, 1 );
+                const sunlightHelper1 = new THREE.DirectionalLightHelper(sun, 1);
+                const toiletLigthHelper = new THREE.PointLightHelper(t_light, 1);
+                const hallway = new THREE.PointLightHelper(H_light, 1);
+                scene.add(pointLightHelper);
+                scene.add(pointLightHelper2);
+                scene.add(sunlightHelper1);
+                scene.add(toiletLigthHelper);
+                scene.add(hallway);
+                
+                gui.add(pointLightHelper,"visible").name("형광등Helper")
+                gui.add(pointLightHelper2,"visible").name("문앞조명Helper")
+                gui.add(pointLightHelper2,"visible").name("화장실조명Helper")
+                gui.add(hallway,"visible").name("복도조명Helper")
+
+                const textureLoader = new THREE.TextureLoader();
+
+                //복도
+                const hallway_m = new THREE.MeshStandardMaterial({color:0xFFFFCC});
+                const hallwayF_m = new THREE.MeshStandardMaterial({color:0xffffff})
+                const hallway_floor = new THREE.Mesh(new THREE.BoxGeometry(3500,0,1500), hallwayF_m);
+                const hallwaySideWall1_g = new THREE.BoxGeometry(3500,1400,10);
+                const hallwaySideWall2_g =new THREE.BoxGeometry(10,1400,1500);
+                const hallwaySideWall3_g = new THREE.BoxGeometry(2900,1400,10);
+                const hallwaySideWall4_g = new THREE.BoxGeometry(400,500,10);
+                const hallwaySideWall5_g = new THREE.BoxGeometry(240,1400,10);
+
+                const hallwayL = new THREE.Mesh(hallwaySideWall1_g, hallway_m);
+                const hallwayR = new THREE.Mesh(hallwaySideWall3_g, hallway_m);
+                const hallwayU = new THREE.Mesh(hallwaySideWall2_g, hallway_m);
+                const hallwayD = new THREE.Mesh(hallwaySideWall2_g, hallway_m);
+                const hallwayDoor = new THREE.Mesh(hallwaySideWall4_g, hallway_m);
+                const hallwayDoorLeft = new THREE.Mesh( hallwaySideWall5_g, hallway_m);                
+
+                hallway_floor.position.set(900,-703,2300);
+                hallwayL.position.set(900,0,3050);
+                hallwayU.position.set(-830,0,2300);
+                hallwayD.position.set(2650,0,2300);
+                hallwayR.position.set(1200,-0,1570);
+                hallwayDoor.position.set(-450,450,1570);
+                hallwayDoorLeft.position.set(-710,0,1570);
+
+                scene.add(hallwayL);
+                scene.add(hallwayR);
+                scene.add(hallwayU);
+                scene.add(hallwayD);
+                scene.add(hallway_floor);
+                scene.add(hallwayDoor);
+                scene.add(hallwayDoorLeft);
+
+
+                //방 - 바닥
+                const floor_color = textureLoader.load("floor1.jpg");
+                const floorGeometry = new THREE.PlaneGeometry( 1500, 3075);
+                const floorMaterial = new THREE.MeshStandardMaterial( {map:floor_color} );
+                const floor = new THREE.Mesh( floorGeometry, floorMaterial );
+                const cilling = new THREE.Mesh( floorGeometry, floorMaterial );
+                floor.rotation.x = 1.5* Math.PI
+                floor.position.set(-75,-700,22)
+                floor.receiveShadow =true;
+
+                cilling.rotation.x = 1.5* Math.PI
+                cilling.position.set(-75,700,22)
+                cilling.receiveShadow =true;
+
+                scene.add(floor);
+                // scene.add(cilling);
+
+                //화장실 바닥
+                const Tfloor_color = textureLoader.load("t.jpg");
+                const toilet_floor = new THREE.Mesh(new THREE.BoxGeometry(720,10,800),new THREE.MeshPhongMaterial({map:Tfloor_color}));
+                toilet_floor.position.set(310,-690,1160);
+                scene.add(toilet_floor);
+
+                //방 벽
+                function create_wall(){
+                    const wall = new THREE.Group();
+
+                    const wall_color = textureLoader.load("wall.jpg");
+                    //방 - 벽 왼쪽, 오른쪽
+                    const wall_height = 1400;
+                    const wall_y = -6;
+                    const wall1Geometry = new THREE.BoxGeometry( 5, 3075, wall_height);
+                    const wall1Material = new THREE.MeshStandardMaterial( {map:wall_color,displacementMap:wall_color } );
+                    const wall1 = new THREE.Mesh( wall1Geometry, wall1Material );
+                    const wall2 = new THREE.Mesh( wall1Geometry, wall1Material);
+                    wall1.rotation.x = 1.5* Math.PI;
+                    wall1.position.set(672,wall_y,22); //오른쪽
+                    wall1.receiveShadow =true;
+
+                    wall2.rotation.x = 1.5* Math.PI;
+                    wall2.position.set(-823,wall_y,22); //왼쪽
+                    wall2.receiveShadow =true;
+
+                    wall.add(wall1);
+                    wall.add(wall2);
+                
+                    //창문쪽 벽
+                    function create_wall2(){
+                        const wall_height = 700;
+                        const wall_width = 750;
+                        const hole_height1 = 300;
+                        const hole_height2 = 500;
+                        const hole_width = 450; 
+
+                        const shape = new THREE.Shape();
+                        const hole = new THREE.Shape();
+            
+                        shape.moveTo(wall_width,wall_height); 
+                        shape.lineTo(wall_width,-wall_height);
+                        shape.lineTo(-wall_width,-wall_height);
+                        shape.lineTo(-wall_width,wall_height);
+
+                        hole.moveTo(hole_width,hole_height2);
+                        hole.lineTo(hole_width,-hole_height1);
+                        hole.lineTo(-hole_width,-hole_height1);
+                        hole.lineTo(-hole_width,hole_height2); 
+                        
+                        shape.holes.push(hole);
+
+                        const setting = {
+                            depth:5, //벽 두께
+                        }
+
+                        const geometry = new THREE.ExtrudeGeometry(shape,setting);
+                        const wall_color = textureLoader.load("wall.jpg");
+                        const m = new THREE.MeshStandardMaterial({ map:wall_color});
+                        const wall = new THREE.Mesh(geometry,m);
+                        return wall
+                    }
+                    const wall3 = create_wall2();
+                    wall3.position.set(-75,wall_y,-1520);
+                    scene.add(wall3);
+
+                //화장실 바깥벽 - 위쪽, 아래쪽
+                    const restroomGeometry = new THREE.BoxGeometry( 725, wall_height, 5);
+                    const restroomMaterial = new THREE.MeshStandardMaterial( {map:wall_color} );
+                    const wall4 = new THREE.Mesh(restroomGeometry, restroomMaterial);
+                    const wall5 = new THREE.Mesh(restroomGeometry, restroomMaterial);
+                    wall4.position.set(310,wall_y,1555);
+                    wall5.position.set(310,wall_y,760);
+
+                    wall.add(wall4); //바깥쪽 화장실 벽    
+                    wall.add(wall5); //방안쪽 침대옆 화장실 벽
+
+                    const rr = new THREE.Shape();
+                    rr.moveTo();
+
+                //화장실 바깥벽 - 문쪽
+                    const shape = new THREE.Shape();
+                    const hole = new THREE.Shape();
+                    s_height = 700;
+                    s_width = 395;
+                    h_height1 = 200;
+                    h_height2 = 700;
+                    h_width = 330; 
+                    shape.moveTo(s_width,s_height );
+                    shape.lineTo(s_width,-s_height );
+                    shape.lineTo(-s_width,-s_height );
+                    shape.lineTo(-s_width,s_height );
+
+                    hole.moveTo(0,h_height1);
+                    hole.lineTo(0,-h_height2);
+                    hole.lineTo(-h_width,-h_height2);
+                    hole.lineTo(-h_width,h_height1);
+
+                    shape.holes.push(hole);
+
+                    const setting = {
+                          //벽 두께
+                            depth:5,
+                    }
+                    wall_color.wrapS = THREE.RepeatWapping;
+                    wall_color.wrapT = THREE.RepeatWapping;
+                    const restroom2Geometry = new THREE.ExtrudeGeometry(shape,setting);
+                    const restroom2Material = new THREE.MeshStandardMaterial( {map:wall_color} );
+                    const wall6 = new THREE.Mesh(restroom2Geometry, restroom2Material);
+                    wall6.position.set(-50,wall_y,1157);
+                    wall6.rotation.y = -1.55;
+
+                    const DoorWall1_g = new THREE.BoxGeometry(350,500,5);
+                    const DoorWall2_g = new THREE.BoxGeometry(230,1400,5);
+                    const DoorWall1 = new THREE.Mesh(DoorWall1_g,wall1Material);
+                    const DoorWall2 = new THREE.Mesh(DoorWall2_g,wall1Material);
+                    const DoorWall3 = new THREE.Mesh(DoorWall2_g,wall1Material);
+
+                    DoorWall_z = 1560;
+                    DoorWall1.position.set(-425,445,DoorWall_z);
+                    DoorWall2.position.set(-705,wall_y,DoorWall_z);
+                    DoorWall3.position.set(-155,wall_y,DoorWall_z);
+                    wall.add(DoorWall1);
+                    wall.add(DoorWall2);
+                    wall.add(DoorWall3);
+
+                    wall.add(wall6);
+                    return wall;
+                }
+
+                const room1 = create_wall();
+                scene.add(room1);
+
+                //문
+                function create_door(){
+                    const door_color = textureLoader.load("ch.jpg");
+                    const door_g = new THREE.BoxGeometry(30,900,350);
+                    const door_m = new THREE.MeshStandardMaterial({map:door_color});
+                    const door = new THREE.Mesh(door_g, door_m);
+                    return door;
+                }
+                const door1 = create_door();
+                const door2 = create_door();
+                door1.position.set(-60,-250,1000);
+                door2.rotation.y = 1.55;
+                door2.position.set(-420,-250,1550);
+                scene.add(door1);
+                scene.add(door2);
+                //창문
+                function create_window(){
+                        const window_g = new THREE.BoxGeometry(900,800,10);
+                        const window_m = new THREE.MeshPhysicalMaterial({
+                            color:0xffffff,
+                            metalness:0.1,
+                            roughness:0.05,
+                            ior:2.5,
+                            thickness:0.2,
+                            transmission:1,
+                            side:THREE.DoubleSide,
+                        });
+                        const window = new THREE.Mesh(window_g, window_m);
+                        return window;
+                    }
+                    const wind = create_window();
+                    wind.position.set(-75,90,-1520);
+                    scene.add(wind);
+
+                //침대
+                const bed_xp = 425;
+                const bed_zp = -355;
+
+                function bed(){
+                    const bed = new THREE.Group();
+                    //침대 - 프레임
+                    const bed_color = textureLoader.load("bed_frame.jpg");
+                    const bframeGeometry = new THREE.BoxGeometry(450,150,980);
+                    const bframeMaterial = new THREE.MeshStandardMaterial({map:bed_color});
+                    const bed_f = new THREE.Mesh(bframeGeometry, bframeMaterial);
+                    bed_f.position.y = -630;
+                    bed_f.position.z = bed_zp;
+                    bed.add(bed_f);
+
+                    //침대 매트리스
+                    const bedm_color = textureLoader.load("bedM.jpg");
+                    const bmGeometry = new THREE.BoxGeometry(430,100,980);
+                    const bmMaterial = new THREE.MeshPhongMaterial({map:bedm_color});
+                    const bed_m = new THREE.Mesh(bmGeometry, bmMaterial);
+                    bed_m.position.y = -530;
+                    bed_m.position.z = bed_zp;
+                    bed.add(bed_m);
+
+                    //침대 헤드
+                    const bedHead_color = textureLoader.load("bed_frame.jpg");
+                    const bedHeadGeometry = new THREE.BoxGeometry(450,350,10);
+                    const bedHeadMaterial = new THREE.MeshStandardMaterial({map:bedHead_color});
+                    const bed_h = new THREE.Mesh(bedHeadGeometry, bedHeadMaterial);
+                    bed_h.position.y = -530;
+                    bed_h.position.z = -850;
+                    bed.add(bed_h);
+
+                    //베개
+                    const p_color = textureLoader.load("pel.jpg");
+                    const p_g = new THREE.BoxGeometry(250,50,100);
+                    const p_m = new THREE.MeshPhongMaterial({map:p_color});
+                    const p = new THREE.Mesh(p_g,p_m);
+                    p.position.set(0,-450,-750);
+
+                    bed.add(p);
+
+                    return bed;
+                }
+
+                const bed1 = bed();
+                const bed2 = bed();
+                bed1.castShadow = true;
+                bed1.receiveShadow = true;
+                bed2.castShadow = true;
+                bed2.receiveShadow = true;
+                bed1.position.set(bed_xp,0,0);
+                bed2.position.set(bed_xp-1000,0,0);
+                scene.add(bed1);
+                scene.add(bed2);
+
+                //옷장
+                function creat_closet(){
+                    const closet = new THREE.Group();
+                    const clo_yp = -210;
+                    //옷장 벽면 뒷부분
+                    const closet_color = textureLoader.load("bed_frame.jpg");
+                    const closetback_g = new THREE.BoxGeometry(10, 1000,600);
+                    const closetback_m = new THREE.MeshStandardMaterial({map:closet_color});
+                    const closetback = new THREE.Mesh(closetback_g, closetback_m);
+                    closetback.position.y = clo_yp;
+                    
+                    closet.add(closetback);
+                    
+                    //옷장 벽면 왼쪽, 오른쪽
+                    const closet_g = new THREE.BoxGeometry(300,1000,10);
+                    const closet_m = new THREE.MeshStandardMaterial({map:closet_color});
+                    const closetLeft = new THREE.Mesh(closet_g, closet_m);
+                    const closetRight = new THREE.Mesh(closet_g, closet_m);
+                    
+                    closetLeft.position.set(-150,clo_yp,300);
+                    closetRight.position.set(-150,clo_yp,-300);
+                    closet.add(closetLeft);
+                    closet.add(closetRight);
+
+                    //옷장 바닥
+                    const closetfloor_g = new THREE.BoxGeometry(300,40,600);
+                    const closetfloor_m = new THREE.MeshStandardMaterial({map:closet_color});
+                    const closetFloor = new THREE.Mesh(closetfloor_g, closetfloor_m);
+                    closetFloor.position.set(-150, -680,0);
+                    closet.add(closetFloor);
+
+                    //옷장 칸
+                    const closetfloor2_g = new THREE.BoxGeometry(300,20,610);
+                    const closetFloor2 = new THREE.Mesh(closetfloor2_g, closetfloor_m);
+                    const closetFloor3 = new THREE.Mesh(closetfloor2_g, closetfloor_m);
+                    const closetFloor4 = new THREE.Mesh(closetfloor2_g, closetfloor_m);
+
+                    closetFloor2.position.set(-150, -460,0);
+                    closetFloor3.position.set(-150,50,0);
+                    closetFloor4.position.set(-150,290,0);
+                    closet.add(closetFloor2);
+                    closet.add(closetFloor3);
+                    closet.add(closetFloor4);
+
+                    //옷장 옷걸이
+                    const closetCylinder_g = new THREE.BoxGeometry(20,20,600);
+                    const closetCylinder_m = new THREE.MeshStandardMaterial({color:0xC0C0C0});
+                    const closetCylinder = new THREE.Mesh(closetCylinder_g, closetCylinder_m);
+                    closetCylinder.position.set(-120,-130,0);
+                    closetCylinder.metalness = 1;
+                    closetCylinder.roughness = 1;
+                    closet.add(closetCylinder);
+
+                    //옷장 문
+                    const closetDoor_g = new THREE.BoxGeometry(20,1000,300);
+                    const closetDoor_m = new THREE.MeshPhongMaterial({map:closet_color});
+                    const closetDoor1 = new THREE.Mesh(closetDoor_g,closetfloor_m);
+                    const closetDoor2 = new THREE.Mesh(closetDoor_g, closetfloor_m);
+                    
+                    closetDoor_xp = -300;
+                    closetDoor_yp = -200;
+                    closetDoor1.position.set(closetDoor_xp,closetDoor_yp,-150);
+                    closetDoor2.position.set(closetDoor_xp,closetDoor_yp,150);
+                    closet.add(closetDoor1);
+                    closet.add(closetDoor2);
+                    
+                    //옷장 손잡이
+                    const closetHandle_g = new THREE.BoxGeometry(10,200,20);
+                    const ClosetHandle_m = new THREE.MeshPhongMaterial({color:0xC0C0C0});
+                    const handle1 = new THREE.Mesh(closetHandle_g,ClosetHandle_m);
+                    const handle2 = new THREE.Mesh(closetHandle_g,ClosetHandle_m);
+                    closetHandle_xp = -350;
+                    closetHandle_yp = -150;
+                    handle1.position.set(closetHandle_xp,closetHandle_yp,-50);
+                    handle2.position.set(closetHandle_xp,closetHandle_yp,50);
+                    closet.add(handle1);
+                    closet.add(handle2);
+                    
+                    return closet;
+                }
+
+                const c1 = creat_closet();
+                const c2 = creat_closet();
+                c1.position.z = 450;
+                c1.position.x = 650;
+                c1.castShadow = true;
+                c2.rotation.y = 3.15;
+                c2.position.set(-800,0,450);
+
+                scene.add(c1);
+                scene.add(c2);
+
+                //책상
+                function desk(){
+                    const desk = new THREE.Group();
+
+                    const desk_color = textureLoader.load("bed_frame.jpg");
+
+                    const deskback_g = new THREE.BoxGeometry(10, 1000,600);
+                    const desk_m = new THREE.MeshPhongMaterial({map:desk_color});
+                    const deskback = new THREE.Mesh(deskback_g, desk_m);
+                    deskback.position.y = -220;
+                    
+                    desk.add(deskback);
+                    
+                    //책상 다리 왼쪽, 오른쪽
+                    const deskleg_g = new THREE.BoxGeometry(300,340,10);
+                    const deskLeft = new THREE.Mesh(deskleg_g, desk_m);
+                    const deskRight = new THREE.Mesh(deskleg_g, desk_m);
+                    
+                    deskLeft.position.set(-150,-540,290);
+                    deskRight.position.set(-150,-540,-290);
+                    desk.add(deskLeft);
+                    desk.add(deskRight);
+
+                    //책상 판넬
+                    const deskPane_g = new THREE.BoxGeometry(300,40,600);
+                    const deskPane = new THREE.Mesh(deskPane_g, desk_m);
+                    deskPane.position.set(-150, -350,0);
+                    desk.add(deskPane);
+
+                    //책장 왼쪽, 오른쪽 판넬
+                    bs_yp = -90; //y 좌표
+                    bs_xp = -70; //x 좌표
+                    const bookshelf_g = new THREE.BoxGeometry(150,500,10);
+                    const bookshelf_m = new THREE.MeshPhongMaterial({map:desk_color});
+                    const bookshelf_left = new THREE.Mesh(bookshelf_g,bookshelf_m);
+                    const bookshelf_right = new THREE.Mesh(bookshelf_g,bookshelf_m);
+                    bookshelf_left.position.set(bs_xp,bs_yp,-295);
+                    bookshelf_right.position.set(bs_xp,bs_yp,295);
+                    desk.add(bookshelf_left);
+                    desk.add(bookshelf_right);
+                    
+                    //책장 판넬1
+                    const bookshelfPane_g = new THREE.BoxGeometry(150,10,600);
+                    const bookshelfPane1 = new THREE.Mesh( bookshelfPane_g,  bookshelf_m);
+                    const bookshelfPane2 = new THREE.Mesh( bookshelfPane_g,  bookshelf_m);
+                    
+                    bookshelfPane1.position.set(bs_xp, -10,0);  //아래쪽
+                    bookshelfPane2.position.set(bs_xp, 160,0);  //위쪽
+                    desk.add(bookshelfPane1);
+                    desk.add(bookshelfPane2);
+
+                    //책장 판넬 2
+                    const bookshelfShortPane_g = new THREE.BoxGeometry(150,160,10);
+                    const bookshelfPane3 = new THREE.Mesh( bookshelfShortPane_g,  bookshelf_m);
+                    bookshelfPane3.position.set(bs_xp,75,0);
+                    desk.add(bookshelfPane3);//책장 반 가르는 판넬
+
+                    //책장 판넬3
+                    const bookShelfLongPane_g = new THREE.BoxGeometry(150, 320,10);
+                    const bookshelfPane4 = new THREE.Mesh(bookShelfLongPane_g,bookshelf_m);
+                    bookshelfPane4.position.set(bs_xp,-175,120);
+                    desk.add(bookshelfPane4); //우측 서랍 긴 판넬
+
+                    //책장 판넬4
+                    const bookshelfP_g = new THREE.BoxGeometry(150,10,170);
+                    const bookshelfPane5 = new THREE.Mesh( bookshelfP_g, bookshelf_m);
+                    bookshelfPane5.position.set(bs_xp,-175,210);
+                    desk.add(bookshelfPane5); //우측 서랍 짧은 판넬
+
+                    return desk;
+                }
+                
+                //서랍
+                function create_drawer(){
+                    //서랍장
+                    const drawer = new THREE.Group();
+                    const drawer_color = textureLoader.load("bed_frame.jpg");
+                    const drawer_m = new THREE.MeshPhongMaterial({map:drawer_color});
+
+                    const drawer_xp=0;
+                    const drawer_zp=0;
+                    const drawer_g = new THREE.BoxGeometry(140,10,150);
+                    const drawer2_g = new THREE.BoxGeometry(140,70, 10);
+                    const drawer3_g = new THREE.BoxGeometry(10,70, 170);
+                    
+                    const drawer_L = new THREE.Mesh(drawer2_g, drawer_m);
+                    const drawer_R = new THREE.Mesh(drawer2_g, drawer_m);
+                    const drawer_U = new THREE.Mesh(drawer3_g, drawer_m);
+                    const drawer_D = new THREE.Mesh(drawer3_g, drawer_m);
+                    const drawer_f = new THREE.Mesh(drawer_g, drawer_m);
+
+                    drawer_f.position.set(-400,0,0);
+                    drawer_L.position.set(-400,30,80);
+                    drawer_R.position.set(-400,30,-80);
+                    drawer_U.position.set(-470,30,0);
+                    drawer_D.position.set(-330,30,0);
+
+                    drawer.add(drawer_f);
+                    drawer.add(drawer_L);
+                    drawer.add(drawer_R);
+                    drawer.add(drawer_U);
+                    drawer.add(drawer_D);
+
+                    //손잡이
+                    const handle_g = new THREE.BoxGeometry(10,10,30);
+                    const handle_m = new THREE.MeshPhongMaterial({color:0xC0C0C0});
+                    const handle = new THREE.Mesh(handle_g,handle_m);
+                    handle.position.set(-320,30,0);
+                    handle.floatSHading = true;
+                    drawer.add(handle);
+
+                    return drawer;
+                }
+
+                const desk1 = new THREE.Group();
+                const desk2 = new THREE.Group();
+                const drawer1_up = create_drawer();
+                const drawer1_down = create_drawer();
+                const drawer2_up = create_drawer();
+                const drawer2_down = create_drawer();
+                
+                drawer1_up.rotation.y = 3.15;
+                drawer1_up.position.set(-620,-435,200);
+                drawer1_down.rotation.y = 3.15;
+                drawer1_down.position.set(-620,-500,200);
+                desk1.add(desk());
+                desk1.add(drawer1_up);
+                desk1.add(drawer1_down);
+
+                drawer2_up.rotation.y = 3.15;
+                drawer2_up.position.set(-620,-435,200);
+                drawer2_down.rotation.y = 3.15;
+                drawer2_down.position.set(-620,-500,200);
+                desk2.add(desk());
+                desk2.add(drawer2_up);
+                desk2.add(drawer2_down);
+
+                desk1.position.set(650,0,-1200);
+                desk2.rotation.y = 3.15;
+                desk2.position.set(-800,0,-1200);
+
+                scene.add(desk1);
+                scene.add(desk2);
+
+                //의자
+                function creat_chair(){
+                    const chair = new THREE.Group();
+
+                    const chair_color = textureLoader.load("ch.jpg");
+                    const chairBack_g = new THREE.BoxGeometry(200,300,10);
+                    const chairSeat_g = new THREE.BoxGeometry(200,10,200);
+                    const chair_m = new THREE.MeshPhongMaterial({
+                        map:chair_color,
+                        floatShading:true
+                    });
+                    const chairBack = new THREE.Mesh(chairBack_g,chair_m);
+                    const chairSeat = new THREE.Mesh(chairSeat_g,chair_m);
+                    chairBack.position.set(0,145,105);
+                    chairSeat.position.set(0,0,0);
+                    chair.add(chairBack);
+                    chair.add(chairSeat);
+
+                    function create_chairLeg(){
+                        const chair_leg = new THREE.Group();
+                        const chairLeg_m = new THREE.MeshPhysicalMaterial({
+                        color:0xC0C0C0,
+                        matalness:0.5,
+                        });
+                        const chairL_g1 = new THREE.CylinderGeometry(5,5,250,100);
+                        const chairL_g2 = new THREE.CylinderGeometry(5,5,200,100);
+                        const chairL_g3 = new THREE.CylinderGeometry(5,5,150,100);
+                        const chairL1 = new THREE.Mesh(chairL_g1,chairLeg_m);
+                        const chairL2 = new THREE.Mesh(chairL_g2,chairLeg_m);
+                        const chairL3 = new THREE.Mesh(chairL_g3,chairLeg_m);
+                        const chairL4 = new THREE.Mesh(chairL_g3,chairLeg_m);
+
+                        const chairR1 = new THREE.Mesh(chairL_g1,chairLeg_m);
+                        const chairR2 = new THREE.Mesh(chairL_g2,chairLeg_m);
+                        const chairR3 = new THREE.Mesh(chairL_g3,chairLeg_m);
+                        const chairR4 = new THREE.Mesh(chairL_g3,chairLeg_m);
+
+                        chairL1.position.set(100,-150,0);
+                        chairL2.position.set(100,-10,0);
+                        chairL3.position.set(100,-75,110);
+                        chairL4.position.set(100,-75,-110);
+
+                        chairR1.position.set(-100,-150,0);
+                        chairR2.position.set(-100,-10,0);
+                        chairR3.position.set(-100,-75,110);
+                        chairR4.position.set(-100,-75,-110);
+
+                        chairL1.rotation.x = 1.57;
+                        chairL2.rotation.x = 1.57;
+                        chairL3.rotation.x = 3;
+                        chairL4.rotation.x = -3;
+
+                        chairR1.rotation.x = 1.57;
+                        chairR2.rotation.x = 1.57;
+                        chairR3.rotation.x = 3;
+                        chairR4.rotation.x = -3;
+
+                        chair_leg.add(chairL1);
+                        chair_leg.add(chairL2);
+                        chair_leg.add(chairL3);
+                        chair_leg.add(chairL4);
+                        chair_leg.add(chairR1);
+                        chair_leg.add(chairR2);
+                        chair_leg.add(chairR3);
+                        chair_leg.add(chairR4);
+
+                        return chair_leg;
+                    }
+                    const LeftLeg = create_chairLeg();
+                    chair.add(LeftLeg);
+                    return chair;
+                }   
+                const ch1 = creat_chair();
+                const ch2 = creat_chair();
+
+                ch1.position.set(350,-545,-1300);
+                ch1.rotation.y = -1.57;
+
+                ch2.position.set(-500,-545,-1100);
+                ch2.rotation.y = 1.57;
+
+                scene.add(ch1);
+                scene.add(ch2);
+                //신발장
+                function creat_shoescloset(){
+                    const closet = new THREE.Group();
+                    const clo_yp = -210;
+                    //신발장 벽면 뒷부분
+                    const closet_color = textureLoader.load("bed_frame.jpg");
+                    const closetback_g = new THREE.BoxGeometry(10, 1000,600);
+                    const closetback_m = new THREE.MeshStandardMaterial({map:closet_color});
+                    const closetback = new THREE.Mesh(closetback_g, closetback_m);
+                    closetback.position.set(-90,clo_yp,0);
+                    
+                    closet.add(closetback);
+                    
+                    //신발장 벽면 왼쪽, 오른쪽
+                    const closet_g = new THREE.BoxGeometry(120,1000,10);
+                    const closet_m = new THREE.MeshStandardMaterial({map:closet_color});
+                    const closetLeft = new THREE.Mesh(closet_g, closet_m);
+                    const closetRight = new THREE.Mesh(closet_g, closet_m);
+                    
+                    closetLeft.position.set(-150,clo_yp,300);
+                    closetRight.position.set(-150,clo_yp,-300);
+                    closet.add(closetLeft);
+                    closet.add(closetRight);
+
+                    //신발장 바닥
+                    const closetfloor_g = new THREE.BoxGeometry(120,40,600);
+                    const closetfloor_m = new THREE.MeshStandardMaterial({map:closet_color});
+                    const closetFloor = new THREE.Mesh(closetfloor_g, closetfloor_m);
+                    closetFloor.position.set(-150, -680,0);
+                    closet.add(closetFloor);
+
+                    //신발장 칸
+                    const closet_zp = -100;
+                    const closetfloor2_g = new THREE.BoxGeometry(120,20,400);
+                    const closetCelling_g = new THREE.BoxGeometry(120,20,600);
+                    const closetPanel_g = new THREE.BoxGeometry(120,1000,20);
+                    const closetShortPane_g = new THREE.BoxGeometry(120,20,200);
+
+                    const closetFloor2 = new THREE.Mesh(closetfloor2_g, closetfloor_m);
+                    const closetFloor3 = new THREE.Mesh(closetfloor2_g, closetfloor_m);
+                    const closetFloor4 = new THREE.Mesh(closetfloor2_g, closetfloor_m);
+                    const closetFloor5 = new THREE.Mesh(closetCelling_g, closetfloor_m);
+                    const closetFloor6 = new THREE.Mesh(closetCelling_g, closetfloor_m);
+                    const closetFloor7 = new THREE.Mesh(closetCelling_g, closetfloor_m);
+                    const closetCelling = new THREE.Mesh(closetCelling_g, closetfloor_m);
+                    const closetPanel = new THREE.Mesh(closetPanel_g, closetfloor_m);
+
+                    const closetShort1 = new THREE.Mesh();
+                    const closetShort2 = new THREE.Mesh();
+                    const closetShort3 = new THREE.Mesh();
+                    
+                    closetFloor2.position.set(-150, -550,closet_zp);
+                    closetFloor3.position.set(-150,-450,closet_zp);
+                    closetFloor4.position.set(-150,-350,closet_zp);
+                    closetFloor5.position.set(-150,-250,0);
+                    closetFloor6.position.set(-150,-120,0);
+                    closetFloor7.position.set(-150,-10,0);
+
+                    closetCelling.position.set(-150,290,0);
+                    closetPanel.position.set(-150,-210,100);
+
+                    closet.add(closetFloor2);
+                    closet.add(closetFloor3);
+                    closet.add(closetFloor4);
+                    closet.add(closetFloor5);
+                    closet.add(closetFloor6);
+                    closet.add(closetFloor7);
+                    closet.add(closetCelling);
+                    closet.add(closetPanel);
+
+                    //신발장 문
+                    const closetDoor_g = new THREE.BoxGeometry(20,1000,300);
+                    const closetDoor_m = new THREE.MeshPhongMaterial({map:closet_color});
+                    const closetDoor1 = new THREE.Mesh(closetDoor_g,closetfloor_m);
+                    const closetDoor2 = new THREE.Mesh(closetDoor_g, closetfloor_m);
+                    
+                    closetDoor_xp = -210;
+                    closetDoor_yp = -200;
+                    closetDoor1.position.set(closetDoor_xp,closetDoor_yp,-150);
+                    closetDoor2.position.set(closetDoor_xp,closetDoor_yp,150);
+                    closet.add(closetDoor1);
+                    closet.add(closetDoor2);
+                    
+                    //신발장 문 손잡이
+                    const closetHandle_g = new THREE.BoxGeometry(10,200,20);
+                    const ClosetHandle_m = new THREE.MeshPhongMaterial({color:0xC0C0C0});
+                    const handle1 = new THREE.Mesh(closetHandle_g,ClosetHandle_m);
+                    const handle2 = new THREE.Mesh(closetHandle_g,ClosetHandle_m);
+                    closetHandle_xp = -250;
+                    closetHandle_yp = -150;
+                    handle1.position.set(closetHandle_xp,closetHandle_yp,-50);
+                    handle2.position.set(closetHandle_xp,closetHandle_yp,50);
+                    closet.add(handle1);
+                    closet.add(handle2);
+
+                    //우산걸이
+                    const bar_g = new THREE.CylinderGeometry(10,10,200,20);
+                    const bar_m = new THREE.MeshStandardMaterial({
+                        color:0xC0C0C0,
+                        metalness:0.5,
+                        roughness:0.1
+                    });
+                    const bar = new THREE.Mesh(bar_g, bar_m);
+                    bar.position.set(-150,-320,200);
+                    bar.rotation.x=1.57;
+                    closet.add(bar);
+
+                    return closet;
+                }
+                const shoseClo = creat_shoescloset();
+                shoseClo.rotation.y = 3.15;
+                shoseClo.position.set(-900,0,1250);
+                scene.add(shoseClo);
+
+                
+                //세면대
+                function create_washstand(){
+                    const washstand = new THREE.Group();
+                    const washstand_g = new THREE.BoxGeometry(420,40,150);
+                    const washstand1_g = new THREE.BoxGeometry(100,40,200);
+                    const washstand_m = new THREE.MeshPhongMaterial({color:0xffffff});
+                    const washstand_1 = new THREE.Mesh(washstand_g, washstand_m);
+                    const washstand_2 = new THREE.Mesh(washstand1_g, washstand_m);
+
+                    function wash(){
+                        const w = new THREE.Group();
+                        const wash_g1 = new THREE.BoxGeometry(200,50,20);
+                        const wash_g2 = new THREE.BoxGeometry(20,50,150);
+                        const wash_g3 = new THREE.BoxGeometry(200,50,70);
+                        const washfloor_g = new THREE.BoxGeometry(200,30,150);
+
+                        const washstand_2 = new THREE.Mesh(wash_g1,washstand_m);
+                        const washstand_3 =  new THREE.Mesh(wash_g3,washstand_m);
+                        const washstand_4 = new THREE.Mesh(wash_g2,washstand_m);
+                        const washstand_5 = new THREE.Mesh(wash_g2,washstand_m);
+                        const washfloor = new THREE.Mesh(washfloor_g, washstand_m);
+
+                        wash_yp = 20;
+                        washfloor.position.set(105,-20,0);
+                        washstand_2.position.set(105,wash_yp,-80);
+                        washstand_3.position.set(105,wash_yp,80);
+                        washstand_4.position.set(210,wash_yp,0);
+                        washstand_5.position.set(0,wash_yp,0);
+                        
+                        w.add(washstand_2);
+                        w.add(washstand_3);
+                        w.add(washstand_4);
+                        w.add(washstand_5);
+                        w.add(washfloor);
+
+                        return w;
+                    }
+
+                    //수도꼭지
+                    const handle = new THREE.Mesh(new THREE.BoxGeometry(10,10,40), new THREE.MeshStandardMaterial({
+                        color:0x000000,
+                        matalness:0.5,
+                        roughness:0.1,
+                    }));
+                    const handle_height = new THREE.Mesh(new THREE.BoxGeometry(10,30,10), new THREE.MeshPhysicalMaterial({
+                        color:0x000000,
+                        matalness:0.5,
+                        roughness:0.1,
+                    }));
+
+                    handle_x = 320;
+                    handle.position.set(handle_x,80,0);
+                    handle_height.position.set(handle_x,70,20);
+                    washstand.add(handle);
+                    washstand.add(handle_height);
+
+                    const w1 = wash();
+                    w1.position.set(220,10,-40);
+                    washstand_1.position.set(20,0,0);
+                    washstand_2.position.set(470,0,-30);
+                    
+                    washstand.add(w1);
+                    washstand.add(washstand_1);
+                    washstand.add(washstand_2);
+                    
+                    return washstand;
+                }
+                const ws = create_washstand();
+                ws.position.set(150,-300,1480);
+                
+                scene.add(ws);
+
+                
+                //거울
+                function creat_mirror(){
+                    const mirror_color = textureLoader.load("mirror.jpg");
+                    const mirror_g = new THREE.BoxGeometry(400,500,10);
+                    const mirror_m = new THREE.MeshStandardMaterial({
+                        matalnessMap:mirror_color,
+                        roughnessMap:mirror_color,
+                        roughness:0.1,
+                        transparent:true,
+                        opacity : 1
+                    });
+                    const mirror = new THREE.Mesh(mirror_g,mirror_m);
+                    mirror
+                    return mirror;
+                }
+
+                const m1 = creat_mirror();
+                m1.position.set(450,140,1530);
+                scene.add(m1);
+
+                //선반
+                function create_shelf(){
+                    const shelf = new THREE.Group();
+                    
+                    const shelf_back = new THREE.BoxGeometry(250,350,10);
+                    const shelf_side = new THREE.BoxGeometry(10,350,100);
+                    const shelf_panel = new THREE.BoxGeometry(250,10,100);
+                    const shelf_m = new THREE.MeshPhongMaterial({
+                        color:0xE0E0E0,
+                    });
+                    
+                    const shelfB_panel = new THREE.Mesh(shelf_back,shelf_m);
+                    const shelfL_panel = new THREE.Mesh(shelf_side,shelf_m);
+                    const shelfR_panel = new THREE.Mesh(shelf_side,shelf_m);
+                    const shelfMiddle_panel = new THREE.Mesh(new THREE.BoxGeometry(10,130,100),shelf_m);
+                    const shelfFloor_panel = new THREE.Mesh(shelf_panel, shelf_m);
+                    const shelf1_panel = new THREE.Mesh(shelf_panel, shelf_m);
+                    const shelf2_panel = new THREE.Mesh(shelf_panel, shelf_m);
+                    const shelfTop_panel = new THREE.Mesh(shelf_panel, shelf_m);
+
+
+                    const shelfSide_xp = 120;
+                    const shelfSide_zp = -50;
+
+                    shelfB_panel.position.set(0,0,0);
+                    shelfL_panel.position.set(shelfSide_xp,0,shelfSide_zp);
+                    shelfR_panel.position.set(-shelfSide_xp,0,shelfSide_zp);
+                    shelf1_panel.position.set(0,60,shelfSide_zp);
+                    shelf2_panel.position.set(0,-50,shelfSide_zp);
+                    shelfFloor_panel.position.set(0,-175,shelfSide_zp);
+                    shelfTop_panel.position.set(0,175,shelfSide_zp);
+                    shelfMiddle_panel.position.set(0,-110,shelfSide_zp);
+
+
+                    shelf.add(shelfB_panel);
+                    shelf.add(shelfL_panel);
+                    shelf.add(shelfR_panel);
+                    shelf.add(shelf1_panel);
+                    shelf.add(shelf2_panel);
+                    shelf.add(shelfFloor_panel);
+                    shelf.add(shelfTop_panel);
+                    shelf.add(shelfMiddle_panel);
+                    return shelf;
+                }
+                const shelf = create_shelf();
+                shelf.position.set(100,100,1550);
+                scene.add(shelf);
+
+
+
+                function updateCamera() {
+                    camera.updateProjectionMatrix()
+                }
+
+                document.getElementById("webgl-output").appendChild(renderer.domElement);
+                renderScene();
+
+                function renderScene() {
+                    controls.update()
+                    requestAnimationFrame(renderScene);
+                    renderer.render(scene, camera);
+                }
+            }
+            window.onload = init;
+        </script>
+    </body>
+</html>
